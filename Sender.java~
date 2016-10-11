@@ -29,23 +29,5 @@ class Sender {
     // You can assume that a single message is shorter than 750 bytes and thus
     // fits into a single packet.
     // Implement me
-    
-    //set up to send packet
-    byte[] sendData = message.getBytes();
-    InetAddress serverAddress = InetAddress.getByName(host);
-    DatagramSocket clientSocket = new DatagramSocket();
-    DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, serverAddress, port);
-      
-    //set up to receive packet
-    byte[] receivedBuffer = new byte[1024];
-    DatagramPacket receivedPkt = new DatagramPacket(receivedBuffer, receivedBuffer.length);
-    //send packet
-    clientSocket.send(sendPkt);
-    //receive packet
-    clientSocket.receive(receivedPkt);
-    
-    
-    clientSocket.close();
-    
   }
 }

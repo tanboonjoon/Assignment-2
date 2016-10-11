@@ -24,5 +24,28 @@ class Receiver {
   
   public String receiveMessage(DatagramSocket socket) throws Exception {
       // Implement me
+    //set up socket
+
+    byte[] receiveBuffer = new byte[1024];
+    
+    while(true) {
+      //set up to receive message
+      DatagramPacket receivedPkt = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+      //receive message and block until a message is received
+      socket.receive(receivedPkt);
+      String receivedData = new String(receivedPkt.getData(), 0 , receivedPkt.getLength());
+      
+      System.out.println(receivedData);
+      //get client information
+      InetAddress clientAddress = receivedPkt.getAddress();
+      int clientPort = receivedPkt.getPort();
+      byte[] sendData = receivedData.getBytes();
+      
+      DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);
+      
+      socket.send(sendPkt);
+    }
+      
+    
   }
 }
