@@ -34,11 +34,12 @@ class Receiver {
       //set up to receive message
       DatagramPacket receivedPkt = new DatagramPacket(receiveBuffer, receiveBuffer.length);
       //receive message and block until a message is received
-      System.out.println("Receiver receive");
+ 
       socket.receive(receivedPkt);
       String receivedData = new String(receivedPkt.getData(), 0 , receivedPkt.getLength());
-      sb = new StringBuilder(receivedData);
-      
+      sb = new StringBuilder();
+      sb.append(receivedData);
+      System.out.println(sb.toString());
       //deconstruct the message
       String[] msgArr = sb.toString().split("\n");
       InetAddress clientAddress = receivedPkt.getAddress();
@@ -49,9 +50,7 @@ class Receiver {
       } else {
 
         String seqNo =  msgArr[0].trim();
-     //   System.out.println(seqNo);
         String checkSum = msgArr[1].trim();
-       // System.out.println(checkSum);
         String message = msgArr[2];
 
         //check if it corrupted
@@ -68,7 +67,7 @@ class Receiver {
 
    
         DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);
-        System.out.println("Sent");
+
         socket.send(sendPkt);
       }
     }
@@ -94,8 +93,7 @@ class Receiver {
     String checksumFile = sb.toString();
     CRC32 checksum = new CRC32();
     checksum.update(checksumFile.getBytes());
-    System.out.println("ACK is " + sb.toString() + " OR " + seqNo);
-    System.out.println("Checksum is " + checksum.getValue());
+
     sb.append("\n").append(checksum.getValue());
     
     return sb.toString().getBytes();

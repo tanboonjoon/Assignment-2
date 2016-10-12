@@ -44,15 +44,15 @@ class Sender {
     
     //send packet
     while(true) {
-      System.out.println("sender send");
+
       clientSocket.send(sendPkt);
       boolean isFail = true;
     //receive packet
       while(true) {
-        System.out.println("sender trying to receive");
+   
         try {
         clientSocket.receive(receivedPkt);
-        System.out.println("receive");
+     
         String receivedData = new String(receivedPkt.getData(), 0 , receivedPkt.getLength());
         boolean isOk = checkStatus(receivedData);
       
@@ -63,7 +63,9 @@ class Sender {
         isFail = false;
         }catch(SocketTimeoutException e ) {
           isFail = true;
-          break;
+          
+        }finally {
+         break; 
         }
       }
       if(!isFail) {
@@ -91,7 +93,7 @@ class Sender {
   
   
   public boolean checkStatus(String message) {
-    System.out.println(message);
+
     String[] msgArr = message.split("\n");
 
     String seqNo = msgArr[0].trim();

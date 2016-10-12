@@ -54,21 +54,27 @@ class Receiver {
         String message = msgArr[2];
 
         //check if it corrupted
-        boolean isCorrupted = checkCorruption(seqNo, Long.parseLong(checkSum), message);
+        try {
+          boolean isCorrupted = checkCorruption(seqNo, Long.parseLong(checkSum), message);
     
-        //print message if not corrupted
-        byte [] sendData = null;
-        if (!isCorrupted) {
-          System.out.println(message); 
-          sendData = constructMsg(0);
-        } else {
-          sendData = constructMsg(-1); 
-        }
-
+          //print message if not corrupted
+          byte [] sendData = null;
+          if (!isCorrupted) {
+            System.out.println(message); 
+            sendData = constructMsg(0);
+          } else {
+            sendData = constructMsg(-1); 
+          }
+          
    
-        DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);
+          DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);
 
-        socket.send(sendPkt);
+          socket.send(sendPkt);
+        }catch(NumberFormatException e) {
+          byte[] sendData = constructMsg(-1);
+          DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);
+          socket.send(sendPkt);
+        }
       }
     }
       

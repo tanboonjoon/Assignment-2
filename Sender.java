@@ -98,12 +98,15 @@ class Sender {
 
     String seqNo = msgArr[0].trim();
     String checksum = msgArr[1].trim();
-    
-    boolean isCorrupted = checkCorruption(seqNo, Long.parseLong(checksum));
-    if(isCorrupted) {
-      return false;
-    }
-    if(seqNo.equals("-1")) {
+    try {
+      boolean isCorrupted = checkCorruption(seqNo, Long.parseLong(checksum));
+      if(isCorrupted) {
+        return false;
+      }
+      if(seqNo.equals("-1")) {
+        return false;
+      }
+    }catch(NumberFormatException e) {
       return false;
     }
     return true;
