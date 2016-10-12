@@ -6,6 +6,8 @@ import java.util.zip.*;
 
 
 class Receiver {
+  int expectedSeqNo = 0;
+  int currentSeqNo = 0;
   public static void main(String[] args) throws Exception {
     // check if the number of command line argument is 4
     if (args.length != 1) {
@@ -20,7 +22,14 @@ class Receiver {
     DatagramSocket socket = new DatagramSocket(port);
     while (true) {
       String message = receiveMessage(socket);
-      System.out.println(message);
+      if(expectedSeqNo == currentSeqNo) {
+        System.out.println(message);
+        if(expectedSeqNo == 0) {
+          expectedSeqNo = 1;
+        }else {
+          expectedSeqNo = 0;
+        }
+      }
     }
   }
   
@@ -55,16 +64,25 @@ class Receiver {
 
         //check if it corrupted
         try {
-          boolean isCorrupted = checkCorruption(seqNo, Long.parseLong(checkSum), message);
-    
+          
+          currentSeqNo = Integer.parseInt(seqNo);
+          if(currentSeqNo != expectedSeqNo) {
+            byte[] sendData = constructMsg(currentSeqNo);
+            DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);
+            socket.send(sendPkt);
+            return "";
+          }
+          
+          boolean isCorrupted = checkCorruption(seqNo, Long.parseLong(checkSum), message);          
           //print message if not corrupted
           byte [] sendData = null;
           if (!isCorrupted) {
  
-            sendData = constructMsg(0);
+            sendData = constructMsg(expectedSeqNo);
           } else {
             sendData = constructMsg(-1); 
           }
+    
           
    
           DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);

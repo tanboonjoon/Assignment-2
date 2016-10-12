@@ -5,7 +5,9 @@ import java.util.zip.*;
 
 
 class Sender {
+  int seqNo = 0 ;
   public static void main(String[] args) throws Exception {
+
     // check if the number of command line argument is 4
     if (args.length != 1) {
       System.out.println("Usage: java Sender <unreliNetPort>");
@@ -32,7 +34,7 @@ class Sender {
     // Implement me
     
     //set up to send packet
-    byte[] sendData = constructMsg(message, 0);
+    byte[] sendData = constructMsg(message, seqNo);
     InetAddress serverAddress = InetAddress.getByName(host);
     DatagramSocket clientSocket = new DatagramSocket();
     clientSocket.setSoTimeout(500);
@@ -71,6 +73,11 @@ class Sender {
       if(!isFail) {
         break;
       }
+    }
+    if(seqNo == 0 ) {
+      seqNo = 1;
+    }else {
+      seqNo = 0;
     }
     clientSocket.close();
     

@@ -39,7 +39,7 @@ class Receiver {
       String receivedData = new String(receivedPkt.getData(), 0 , receivedPkt.getLength());
       sb = new StringBuilder();
       sb.append(receivedData);
-      System.out.println(sb.toString());
+      //System.out.println(sb.toString());
       //deconstruct the message
       String[] msgArr = sb.toString().split("\n");
       InetAddress clientAddress = receivedPkt.getAddress();
@@ -60,7 +60,7 @@ class Receiver {
           //print message if not corrupted
           byte [] sendData = null;
           if (!isCorrupted) {
-            System.out.println(message); 
+ 
             sendData = constructMsg(0);
           } else {
             sendData = constructMsg(-1); 
@@ -70,6 +70,9 @@ class Receiver {
           DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);
 
           socket.send(sendPkt);
+          if(!isCorrupted) {
+            return message;
+          }
         }catch(NumberFormatException e) {
           byte[] sendData = constructMsg(-1);
           DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, clientAddress, clientPort);
