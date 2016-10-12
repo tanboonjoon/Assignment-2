@@ -1,6 +1,7 @@
 import java.net.*;
 import java.nio.*;
-import java.util.Scanner;
+import java.util.*;
+import java.util.zip.*;
 
 
 class Sender {
@@ -31,21 +32,91 @@ class Sender {
     // Implement me
     
     //set up to send packet
-    byte[] sendData = message.getBytes();
+    byte[] sendData = constructMsg(message, 0);
     InetAddress serverAddress = InetAddress.getByName(host);
     DatagramSocket clientSocket = new DatagramSocket();
+    clientSocket.setSoTimeout(500);
     DatagramPacket sendPkt = new DatagramPacket(sendData, sendData.length, serverAddress, port);
       
     //set up to receive packet
     byte[] receivedBuffer = new byte[1024];
     DatagramPacket receivedPkt = new DatagramPacket(receivedBuffer, receivedBuffer.length);
+    
     //send packet
-    clientSocket.send(sendPkt);
+    while(true) {
+
+      clientSocket.send(sendPkt);
+      boolean isFail = true;
     //receive packet
-    clientSocket.receive(receivedPkt);
-    
-    
+      while(true) {
+   
+        try {
+        clientSocket.receive(receivedPkt);
+     
+        String receivedData = new String(receivedPkt.getData(), 0 , receivedPkt.getLength());
+        boolean isOk = checkStatus(receivedData);
+      
+        if(!isOk) {
+          break;
+        }
+        
+        isFail = false;
+        }catch(SocketTimeoutException e ) {
+          isFail = true;
+          
+        }finally {
+         break; 
+        }
+      }
+      if(!isFail) {
+        break;
+      }
+    }
     clientSocket.close();
     
+  }
+  public byte[] constructMsg(String message, int seq) {
+    StringBuilder sb = new StringBuilder();
+    
+    String checksumFile = new StringBuilder().append(seq).append(message).toString();
+    byte[] fileSize = checksumFile.getBytes();
+    CRC32 checksum = new CRC32();
+    checksum.update(fileSize);
+    
+    //build a string with seqNo, checksum and message
+    sb.append(seq).append("\n").append(checksum.getValue()).append("\n").append(message);
+
+    String newMessage = sb.toString();
+    //System.out.println(newMessage);
+    return newMessage.getBytes();
+  }
+  
+  
+  public boolean checkStatus(String message) {
+
+    String[] msgArr = message.split("\n");
+
+    String seqNo = msgArr[0].trim();
+    String checksum = msgArr[1].trim();
+    
+    boolean isCorrupted = checkCorruption(seqNo, Long.parseLong(checksum));
+    if(isCorrupted) {
+      return false;
+    }
+    if(seqNo.equals("-1")) {
+      return false;
+    }
+    return true;
+  }
+  
+  public boolean checkCorruption(String seqNo, long originalChecksum) {
+   CRC32 getChecksum = new CRC32();
+   getChecksum.update(seqNo.getBytes());
+   long checksum =  getChecksum.getValue();
+   if(checksum != originalChecksum) {
+     return true;
+   }
+   return false;
+   
   }
 }
